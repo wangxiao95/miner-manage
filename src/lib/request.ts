@@ -1,5 +1,5 @@
 import request from './node-digest-auth'
-import {getConfig} from '../config/index'
+import { getConfig } from '../config/index'
 
 interface Options {
   user: string

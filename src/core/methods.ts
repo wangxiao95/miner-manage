@@ -1,4 +1,4 @@
-import { authGet, authPost } from '../lib/request'
+import { authGet } from '../lib/request'
 
 enum Path {
   getSummary = 'cgi-bin/summary.cgi',

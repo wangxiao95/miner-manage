@@ -1,5 +1,4 @@
 const router = require('koa-router')()
-import { getSummary } from "../core/methods"
 
 // router.get('/getSummary', async ctx => {
 //   const { user, password, ip } = ctx.request.query
