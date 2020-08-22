@@ -8,7 +8,7 @@ enum Path {
   getChart = 'cgi-bin/chart.cgi',
   getMinerConfig = 'cgi-bin/get_miner_conf.cgi',
   setMinerConfig = 'cgi-bin/set_miner_conf.cgi',
-  resetConfig = 'cgi-bin/reset_conf.cgi',
+  // resetConfig = 'cgi-bin/reset_conf.cgi',
   reboot = 'cgi-bin/reboot.cgi'
 }
 
