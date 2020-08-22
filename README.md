@@ -14,17 +14,15 @@
 
 **paths**
 ```bash
-enum Path {
-  getSummary = 'cgi-bin/summary.cgi',
-  getSystemInfo = 'cgi-bin/get_system_info.cgi',
-  getPools = 'cgi-bin/pools.cgi',
-  getStats = 'cgi-bin/stats.cgi',
-  getChart = 'cgi-bin/chart.cgi',
-  getMinerConfig = 'cgi-bin/get_miner_conf.cgi',
-  setMinerConfig = 'cgi-bin/set_miner_conf.cgi',
-  resetConfig = 'cgi-bin/reset_conf.cgi',
-  reboot = 'cgi-bin/reboot.cgi'
-}
+  getSummary
+  getSystemInfo
+  getPools 
+  getStats 
+  getChart
+  getMinerConfig
+  setMinerConfig
+  resetConfig
+  reboot
 ```
 
 **build**
