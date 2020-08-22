@@ -7,7 +7,7 @@ export const getConfig = function (method, path, ip){
     headers: {
       'Connection': 'Keep-Alive',
       'Content-Type': 'application/json',
-      'Host': '192.168.2.2'
+      'Host': ip || '192.168.2.2'
     }
   }
 }
