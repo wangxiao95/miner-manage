@@ -8,9 +8,9 @@
 
 `npm run dev` or `yarn dev`
     
-**浏览器**
+**part 1**
 
-`http://localhost:9001/[paths]?user=root&password=root&ip=192.168.2.2`
+`http://localhost:9001/auth/[paths]?user=root&password=root&ip=192.168.2.2`
 
 **paths**
 ```bash
@@ -23,6 +23,16 @@
   setMinerConfig
   resetConfig
   reboot
+```
+
+**part 2**
+
+`http://localhost:9001/session/[paths]?user=admin&password=admin&ip=192.168.2.2`
+
+**paths**
+```bash
+  getDevice
+  getMiners
 ```
 
 **build**

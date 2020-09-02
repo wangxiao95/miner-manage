@@ -76,7 +76,7 @@ function writeCompileToDev(stats) {
     data = assets[key].source();
     fs.writeFileSync(file, data);
   });
-  cmd.run('nodemon ./dev/index.js')
+  // cmd.run('nodemon ./dev/index.js')
 }
 
 /**

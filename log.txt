@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+		<meta charset="utf-8">
+		<title>WhatsMiner - 总览 - LuCI</title>
+		<!--[if lt IE 9]><script src="/luci-static/bootstrap/html5.js?v=git-16.336.70424-1fd43b4"></script><![endif]-->
+		<meta name="viewport" content="initial-scale=1.0">
+		<link rel="stylesheet" href="/luci-static/bootstrap/cascade.css?v=git-16.336.70424-1fd43b4">
+		<link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="/luci-static/bootstrap/mobile.css?v=git-16.336.70424-1fd43b4" type="text/css" />
+		<link rel="shortcut icon" href="/luci-static/bootstrap/favicon.ico">
+		<script src="/luci-static/resources/xhr.js?v=git-16.336.70424-1fd43b4"></script>
+	</head>
+
+	<body class="lang_zh-cnOverview">
+		<header>
+			<div class="fill">
+				<div class="container">
+					<a class="brand" href="#">WhatsMiner</a>
+					<ul class="nav"><li class="dropdown"><a class="menu" href="#">状态</a><ul class="dropdown-menu"><li><a href="/cgi-bin/luci/admin/status/cgminerstatus">CGMiner Status</a></li><li><a href="/cgi-bin/luci/admin/status/cgminerapi">CGMiner API Log</a></li><li><a href="/cgi-bin/luci/admin/status/syslog">系统日志</a></li><li><a href="/cgi-bin/luci/admin/status/minerlog">Miner Log</a></li><li><a href="/cgi-bin/luci/admin/status/processes">系统进程</a></li><li><a href="/cgi-bin/luci/admin/status/overview">总览</a></li></ul></li><li class="dropdown"><a class="menu" href="#">系统</a><ul class="dropdown-menu"><li><a href="/cgi-bin/luci/admin/system/system">系统</a></li><li><a href="/cgi-bin/luci/admin/system/admin">管理权</a></li><li><a href="/cgi-bin/luci/admin/system/reboot">重启</a></li></ul></li><li class="dropdown"><a class="menu" href="#">配置</a><ul class="dropdown-menu"><li><a href="/cgi-bin/luci/admin/network/network">接口</a></li><li><a href="/cgi-bin/luci/admin/network/cgminer">CGMiner Configuration</a></li></ul></li><li><a href="/cgi-bin/luci/admin/logout">退出</a></li></ul>
+					<div class="pull-right">
+						
+						<span id="xhr_poll_status" style="display:none" onclick="XHR.running() ? XHR.halt() : XHR.run()">
+							<span class="label success" id="xhr_poll_status_on">自动刷新 开</span>
+							<span class="label" id="xhr_poll_status_off" style="display:none">自动刷新 关</span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</header><div id="maincontent" class="container">
+			
+
+
+
+<script type="text/javascript" src="/luci-static/resources/cbi.js?v=git-16.336.70424-1fd43b4"></script>
+<script type="text/javascript">//<![CDATA[
+	function progressbar(v, m)
+	{
+		var vn = parseInt(v) || 0;
+		var mn = parseInt(m) || 100;
+		var pc = Math.floor((100 / mn) * vn);
+
+		return String.format(
+			'<div style="width:200px; position:relative; border:1px solid #999999">' +
+				'<div style="background-color:#CCCCCC; width:%d%%; height:15px">' +
+					'<div style="position:absolute; left:0; top:0; text-align:center; width:100%%; color:#000000">' +
+						'<small>%s / %s (%d%%)</small>' +
+					'</div>' +
+				'</div>' +
+			'</div>', pc, v, m, pc
+		);
+	}
+
+	function wifirate(bss, rx) {
+		var p = rx ? 'rx_' : 'tx_',
+		    s = '%.1f Mbit/s, %dMHz'
+					.format(bss[p+'rate'] / 1000, bss[p+'mhz']),
+		    ht = bss[p+'ht'], vht = bss[p+'vht'],
+			mhz = bss[p+'mhz'], nss = bss[p+'nss'],
+			mcs = bss[p+'mcs'], sgi = bss[p+'short_gi'];
+
+		if (ht || vht) {
+			if (vht) s += ', VHT-MCS %d'.format(mcs);
+			if (nss) s += ', VHT-NSS %d'.format(nss);
+			if (ht)  s += ', MCS %s'.format(mcs);
+			if (sgi) s += ', Short GI';
+		}
+
+		return s;
+	}
+
+	function duid2mac(duid) {
+		// DUID-LLT / Ethernet
+		if (duid.length === 28 && duid.substr(0, 8) === '00010001')
+			return duid.substr(16).replace(/(..)(?=..)/g, '$1:').toUpperCase();
+
+		// DUID-LL / Ethernet
+		if (duid.length === 24 && duid.substr(0, 8) === '00030001')
+			return duid.substr(8).replace(/(..)(?=..)/g, '$1:').toUpperCase();
+
+		return null;
+	}
+
+	var npoll = 1;
+	var hosts = {"00:E0:4C:68:05:0B":{"ipv4":"192.168.2.1"},"C6:06:03:00:48:5D":{"ipv4":"192.168.2.2"}};
+
+	function updateHosts() {
+		XHR.get('/cgi-bin/luci/admin/status/overview', { hosts: 1 }, function(x, data) {
+			hosts = data;
+		});
+	}
+
+	XHR.poll(5, '/cgi-bin/luci/admin/status/overview', { status: 1 },
+		function(x, info)
+		{
+			if (!(npoll++ % 5))
+				updateHosts();
+
+			var si = document.getElementById('wan4_i');
+			var ss = document.getElementById('wan4_s');
+			var ifc = info.wan;
+
+			if (ifc && ifc.ifname && ifc.proto != 'none')
+			{
+				var s = String.format(
+					'<strong>类型: </strong>%s<br />' +
+					'<strong>地址: </strong>%s<br />' +
+					'<strong>子网掩码: </strong>%s<br />' +
+					'<strong>网关: </strong>%s<br />',
+						ifc.proto,
+						(ifc.ipaddr) ? ifc.ipaddr : '0.0.0.0',
+						(ifc.netmask && ifc.netmask != ifc.ipaddr) ? ifc.netmask : '255.255.255.255',
+						(ifc.gwaddr) ? ifc.gwaddr : '0.0.0.0'
+				);
+
+				for (var i = 0; i < ifc.dns.length; i++)
+				{
+					s += String.format(
+						'<strong>DNS %d: </strong>%s<br />',
+						i + 1, ifc.dns[i]
+					);
+				}
+
+				if (ifc.expires > -1)
+				{
+					s += String.format(
+						'<strong>到期时间: </strong>%t<br />',
+						ifc.expires
+					);
+				}
+
+				if (ifc.uptime > 0)
+				{
+					s += String.format(
+						'<strong>已连接: </strong>%t<br />',
+						ifc.uptime
+					);
+				}
+
+				ss.innerHTML = String.format('<small>%s</small>', s);
+				si.innerHTML = String.format(
+					'<img src="/luci-static/resources/icons/ethernet.png" />' +
+					'<br /><small><a href="%s">%s</a></small>',
+						ifc.link, ifc.ifname
+				);
+			}
+			else
+			{
+				si.innerHTML = '<img src="/luci-static/resources/icons/ethernet_disabled.png" /><br /><small>?</small>';
+				ss.innerHTML = '<em>未连接</em>';
+			}
+
+			
+
+			
+
+			
+
+			
+
+			var e;
+
+			if (e = document.getElementById('localtime'))
+				e.innerHTML = info.localtime;
+
+			if (e = document.getElementById('uptime'))
+				e.innerHTML = String.format('%t', info.uptime);
+
+			if (e = document.getElementById('loadavg'))
+				e.innerHTML = String.format(
+					'%.02f, %.02f, %.02f',
+					info.loadavg[0] / 65535.0,
+					info.loadavg[1] / 65535.0,
+					info.loadavg[2] / 65535.0
+				);
+
+			if (e = document.getElementById('memtotal'))
+				e.innerHTML = progressbar(
+					((info.memory.free + info.memory.buffered) / 1024) + " kB",
+					(info.memory.total / 1024) + " kB"
+				);
+
+			if (e = document.getElementById('memfree'))
+				e.innerHTML = progressbar(
+					(info.memory.free / 1024) + " kB",
+					(info.memory.total / 1024) + " kB"
+				);
+
+			if (e = document.getElementById('membuff'))
+				e.innerHTML = progressbar(
+					(info.memory.buffered / 1024) + " kB",
+					(info.memory.total / 1024) + " kB"
+				);
+
+			if (e = document.getElementById('swaptotal'))
+				e.innerHTML = progressbar(
+					(info.swap.free / 1024) + " kB",
+					(info.swap.total / 1024) + " kB"
+				);
+
+			if (e = document.getElementById('swapfree'))
+				e.innerHTML = progressbar(
+					(info.swap.free / 1024) + " kB",
+					(info.swap.total / 1024) + " kB"
+				);
+
+			if (e = document.getElementById('conns'))
+				e.innerHTML = progressbar(info.conncount, info.connmax);
+
+		}
+	);
+//]]></script>
+
+<h2 name="content">状态</h2>
+
+<fieldset class="cbi-section">
+	<legend>系统</legend>
+
+	<table width="100%" cellspacing="10">
+		<tr><td width="33%">主机型号</td><td>WhatsMiner </td></tr>
+        <tr><td width="33%">主机名</td><td>.unknown.H6OS-V10.PX</td></tr>
+		<tr><td width="33%">固件版本</td><td>20200801.11.REL</td></tr>
+		<tr><td width="33%">内核版本</td><td>#2506 SMP PREEMPT Sat Aug 1 11:23:50 CST 2020</td></tr>
+		<tr><td width="33%">CGMiner Version</td><td>unknown(waiting cgminer to start)</td></tr>
+		<tr><td width="33%">本地时间</td><td id="localtime">-</td></tr>
+		<tr><td width="33%">运行时间</td><td id="uptime">-</td></tr>
+		<tr><td width="33%">平均负载</td><td id="loadavg">-</td></tr>
+	</table>
+</fieldset>
+
+<fieldset class="cbi-section">
+	<legend>内存</legend>
+
+	<table width="100%" cellspacing="10">
+		<tr><td width="33%">可用数</td><td id="memtotal">-</td></tr>
+		<tr><td width="33%">空闲数</td><td id="memfree">-</td></tr>
+		<tr><td width="33%">已缓冲</td><td id="membuff">-</td></tr>
+	</table>
+</fieldset>
+
+
+
+<fieldset class="cbi-section">
+	<legend>网络</legend>
+
+	<table width="100%" cellspacing="10">
+		<tr><td width="33%" style="vertical-align:top">IPv4 WAN 状态</td><td>
+			<table><tr>
+				<td id="wan4_i" style="width:16px; text-align:center; padding:3px"><img src="/luci-static/resources/icons/ethernet_disabled.png" /><br /><small>?</small></td>
+				<td id="wan4_s" style="vertical-align:middle; padding: 3px"><em>正在收集数据...</em></td>
+			</tr></table>
+		</td></tr>
+		
+		<tr><td width="33%">活动连接</td><td id="conns">-</td></tr>
+	</table>
+</fieldset>
+
+
+
+
+
+
+   <footer>
+    <a href="https://github.com/openwrt/luci">Powered by LuCI Master (git-16.336.70424-1fd43b4)</a> / LEDE Reboot 17.01.4 r3560-79f57e422d
+    
+   </footer>
+   </div>
+  </div>
+ </body>
+</html>
+
+

@@ -37,6 +37,9 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "axios": "^0.20.0",
+    "cheerio": "^1.0.0-rc.3",
+    "jquery": "^3.5.1",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^9.4.0",
