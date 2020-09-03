@@ -35,7 +35,7 @@ const config = {
         use: {
           loader: 'babel-loader'
         },
-        include: [path.resolve('./src')]
+        include: [path.resolve('./src'),/node_modules\/FormData/]
       }
     ]
   },

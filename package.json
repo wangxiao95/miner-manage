@@ -37,8 +37,10 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "FormData": "^0.10.1",
     "axios": "^0.20.0",
     "cheerio": "^1.0.0-rc.3",
+    "form-data": "^3.0.0",
     "jquery": "^3.5.1",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",

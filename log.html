@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+		<meta charset="utf-8">
+		<title>WhatsMiner - Pool - LuCI</title>
+		<!--[if lt IE 9]><script src="/luci-static/bootstrap/html5.js?v=git-16.336.70424-1fd43b4"></script><![endif]-->
+		<meta name="viewport" content="initial-scale=1.0">
+		<link rel="stylesheet" href="/luci-static/bootstrap/cascade.css?v=git-16.336.70424-1fd43b4">
+		<link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="/luci-static/bootstrap/mobile.css?v=git-16.336.70424-1fd43b4" type="text/css" />
+		<link rel="shortcut icon" href="/luci-static/bootstrap/favicon.ico">
+		<script src="/luci-static/resources/xhr.js?v=git-16.336.70424-1fd43b4"></script>
+	</head>
+
+	<body class="lang_zh-cnPool">
+		<header>
+			<div class="fill">
+				<div class="container">
+					<a class="brand" href="#">WhatsMiner</a>
+					<ul class="nav"><li class="dropdown"><a class="menu" href="#">状态</a><ul class="dropdown-menu"><li><a href="/cgi-bin/luci/admin/status/cgminerstatus">CGMiner Status</a></li><li><a href="/cgi-bin/luci/admin/status/cgminerapi">CGMiner API Log</a></li><li><a href="/cgi-bin/luci/admin/status/syslog">系统日志</a></li><li><a href="/cgi-bin/luci/admin/status/minerlog">Miner Log</a></li><li><a href="/cgi-bin/luci/admin/status/processes">系统进程</a></li><li><a href="/cgi-bin/luci/admin/status/overview">总览</a></li></ul></li><li class="dropdown"><a class="menu" href="#">系统</a><ul class="dropdown-menu"><li><a href="/cgi-bin/luci/admin/system/system">系统</a></li><li><a href="/cgi-bin/luci/admin/system/admin">管理权</a></li><li><a href="/cgi-bin/luci/admin/system/reboot">重启</a></li></ul></li><li class="dropdown"><a class="menu" href="#">配置</a><ul class="dropdown-menu"><li><a href="/cgi-bin/luci/admin/network/network">接口</a></li><li><a href="/cgi-bin/luci/admin/network/cgminer">CGMiner Configuration</a></li></ul></li><li><a href="/cgi-bin/luci/admin/logout">退出</a></li></ul>
+					<div class="pull-right">
+						
+						<span id="xhr_poll_status" style="display:none" onclick="XHR.running() ? XHR.halt() : XHR.run()">
+							<span class="label success" id="xhr_poll_status_on">自动刷新 开</span>
+							<span class="label" id="xhr_poll_status_off" style="display:none">自动刷新 关</span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</header><div id="maincontent" class="container">
+			<ul class="tabs"><li class="tabmenu-item-pool active"><a href="/cgi-bin/luci/admin/network/cgminer/pool">Pool</a></li><li class="tabmenu-item-power "><a href="/cgi-bin/luci/admin/network/cgminer/power">Power</a></li></ul>
+
+
+<form method="post" name="cbi" action="/cgi-bin/luci/admin/network/cgminer" enctype="multipart/form-data" onreset="return cbi_validate_reset(this)" onsubmit="return cbi_validate_form(this, '一些项目的值无效，无法保存！')">
+	<div>
+		<script type="text/javascript" src="/luci-static/resources/cbi.js?v=git-16.336.70424-1fd43b4" data-strings="{&#34;path&#34;:{&#34;resource&#34;:&#34;\/luci-static\/resources&#34;,&#34;browser&#34;:&#34;\/cgi-bin\/luci\/admin\/filebrowser&#34;},&#34;label&#34;:{&#34;choose&#34;:&#34;-- 请选择 --&#34;,&#34;custom&#34;:&#34;-- 自定义 --&#34;}}"></script>
+		<input type="hidden" name="token" value="cb8455b341fd8d405fa9ecfc27eba5e4" />
+		<input type="hidden" name="cbi.submit" value="1" />
+		<input type="submit" value="保存" class="hidden" />
+	</div>
+<div class="cbi-map" id="cbi-pools">
+	<h2 name="content">配置</h2>
+	<fieldset class="cbi-section" id="cbi-apply-pools">
+	<legend>正在应用更改</legend>
+	<script type="text/javascript">//<![CDATA[
+		var apply_xhr = new XHR();
+
+		apply_xhr.post('/cgi-bin/luci/servicectl/restart/pools', { token: 'cb8455b341fd8d405fa9ecfc27eba5e4' },
+			function() {
+				var checkfinish = function() {
+					apply_xhr.get('/cgi-bin/luci/servicectl/status', null,
+						function(x) {
+							if( x.responseText == 'finish' )
+							{
+								var e = document.getElementById('cbi-apply-pools-status');
+								if( e )
+								{
+									e.innerHTML = '配置已应用。';
+									window.setTimeout(function() {
+										e.parentNode.style.display = 'none';
+										
+									}, 1000);
+								}
+							}
+							else
+							{
+								var e = document.getElementById('cbi-apply-pools-status');
+								if( e && x.responseText ) e.innerHTML = x.responseText;
+
+								window.setTimeout(checkfinish, 1000);
+							}
+						}
+					);
+				}
+
+				window.setTimeout(checkfinish, 1000);
+			}
+		);
+	//]]></script>
+
+	<img src="/luci-static/resources/icons/loading.gif" alt="加载中" style="vertical-align:middle" />
+	<span id="cbi-apply-pools-status">正在应用更改...</span>
+</fieldset><fieldset class="cbi-section" id="cbi-pools-pools">
+	
+	
+	
+
+		
+
+		<fieldset class="cbi-section-node" id="cbi-pools-default">
+			
+
+
+	
+
+<div class="cbi-value" id="cbi-pools-default-coin_type" data-index="1" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.coin_type">Coin Type</label>
+		<div class="cbi-value-field">
+
+
+	<select class="cbi-input-select" data-update="change" id="cbid.pools.default.coin_type" name="cbid.pools.default.coin_type" size="1">
+		<option id="cbid.pools.default.coin_type-BTC" value="BTC" data-index="1" data-depends="[]" selected="selected">BTC</option>
+	</select>
+
+		</div></div>
+
+<div class="cbi-value" id="cbi-pools-default-pool1url" data-index="2" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool1url">Pool 1</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool1url" name="cbid.pools.default.pool1url" type="text" class="cbi-input-text" value="stratumtcp://stratum.f2pool.com:3333" data-type="string" data-optional="true" data-choices="[[&#34;stratum+tcp:\/\/btc.ss.poolin.com:443&#34;,&#34;stratum+tcp:\/\/stratum.f2pool.com:3333&#34;,&#34;stratum+tcp:\/\/stratum.bixin.com:443&#34;],[&#34;stratum+tcp:\/\/btc.ss.poolin.com:443&#34;,&#34;stratum+tcp:\/\/stratum.f2pool.com:3333&#34;,&#34;stratum+tcp:\/\/stratum.bixin.com:443&#34;]]" />
+	
+		</div></div>
+
+<div class="cbi-value" id="cbi-pools-default-pool1user" data-index="3" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool1user">Pool1 worker</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool1user" name="cbid.pools.default.pool1user" type="text" class="cbi-input-text" value="12313" />
+	
+		</div></div>
+
+<div class="cbi-value" id="cbi-pools-default-pool1pw" data-index="4" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool1pw">Pool1 password</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool1pw" name="cbid.pools.default.pool1pw" type="text" class="cbi-input-text" value="111" />
+	
+		</div></div>
+
+<div class="cbi-value" id="cbi-pools-default-pool2url" data-index="5" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool2url">Pool 2</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool2url" name="cbid.pools.default.pool2url" type="text" class="cbi-input-text" value="stratum tcp://btc-vip-3dcoa7jxu.ss.poolin.com:443" data-type="string" data-optional="true" data-choices="[[&#34;stratum+tcp:\/\/btc.ss.poolin.com:443&#34;,&#34;stratum+tcp:\/\/stratum.f2pool.com:3333&#34;,&#34;stratum+tcp:\/\/stratum.bixin.com:443&#34;],[&#34;stratum+tcp:\/\/btc.ss.poolin.com:443&#34;,&#34;stratum+tcp:\/\/stratum.f2pool.com:3333&#34;,&#34;stratum+tcp:\/\/stratum.bixin.com:443&#34;]]" />
+	
+		</div></div>
+
+<div class="cbi-value" id="cbi-pools-default-pool2user" data-index="6" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool2user">Pool2 worker</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool2user" name="cbid.pools.default.pool2user" type="text" class="cbi-input-text" value="1231" />
+	
+		</div></div>
+
+<div class="cbi-value" id="cbi-pools-default-pool2pw" data-index="7" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool2pw">Pool2 password</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool2pw" name="cbid.pools.default.pool2pw" type="text" class="cbi-input-text" value="222" />
+	
+		</div></div>
+
+<div class="cbi-value" id="cbi-pools-default-pool3url" data-index="8" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool3url">Pool 3</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool3url" name="cbid.pools.default.pool3url" type="text" class="cbi-input-text" value="stratumtcp://stratum.f2pool.com:3333" data-type="string" data-optional="true" data-choices="[[&#34;stratum+tcp:\/\/btc.ss.poolin.com:443&#34;,&#34;stratum+tcp:\/\/stratum.f2pool.com:3333&#34;,&#34;stratum+tcp:\/\/stratum.bixin.com:443&#34;],[&#34;stratum+tcp:\/\/btc.ss.poolin.com:443&#34;,&#34;stratum+tcp:\/\/stratum.f2pool.com:3333&#34;,&#34;stratum+tcp:\/\/stratum.bixin.com:443&#34;]]" />
+	
+		</div></div>
+
+<div class="cbi-value" id="cbi-pools-default-pool3user" data-index="9" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool3user">Pool3 worker</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool3user" name="cbid.pools.default.pool3user" type="text" class="cbi-input-text" value="s2123134df" />
+	
+		</div></div>
+
+<div class="cbi-value cbi-value-last" id="cbi-pools-default-pool3pw" data-index="10" data-depends="[]"><label class="cbi-value-title" for="cbid.pools.default.pool3pw">Pool3 password</label>
+		<div class="cbi-value-field">
+
+	<input data-update="change" id="cbid.pools.default.pool3pw" name="cbid.pools.default.pool3pw" type="text" class="cbi-input-text" value="12313" />
+	
+		</div></div>
+
+
+
+
+
+
+
+
+		</fieldset>
+		<br />
+
+	
+
+	
+</fieldset>
+	
+
+	<br />
+</div>
+<div class="cbi-page-actions">
+		
+
+		
+		
+			<input class="cbi-button cbi-button-apply" type="submit" name="cbi.apply" value="保存&#38;应用" />
+		
+        <!--
+		
+			<input class="cbi-button cbi-button-save" type="submit" value="保存" />
+		
+		
+			<input class="cbi-button cbi-button-reset" type="button" value="复位" onclick="location.href='/cgi-bin/luci/admin/network/cgminer'" />
+		
+        -->
+	</div></form>
+
+<script type="text/javascript">cbi_init();</script>
+
+
+   <footer>
+    <a href="https://github.com/openwrt/luci">Powered by LuCI Master (git-16.336.70424-1fd43b4)</a> / LEDE Reboot 17.01.4 r3560-79f57e422d
+    
+   </footer>
+   </div>
+  </div>
+ </body>
+</html>
+
+

@@ -1,6 +1,6 @@
 import commonGet from '../core/methods'
 import * as https from 'https'
-import { getDeviceInfo, getMiners } from '../core/sessionAuthMethods'
+import { getDeviceInfo, getMiners, setMiners } from '../core/sessionAuthMethods'
 
 const router = require('koa-router')()
 
@@ -37,6 +37,21 @@ router.get('/session/getMiners', async ctx => {
     console.log(e)
   }
 })
+
+router.post('/session/setMiners', async ctx => {
+  const { user, password, ip } = ctx.request.query
+
+  const miners = ctx.request.body
+  try {
+    const data = await setMiners({
+      user, password, ip, miners
+    })
+    ctx.body = data
+  } catch (e) {
+    console.log(e)
+  }
+})
+
 
 
 // router.get('/session/setMiners', async ctx => {
