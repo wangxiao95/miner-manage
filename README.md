@@ -33,6 +33,7 @@
 ```bash
   getDevice
   getMiners
+  setMinners: @method: post;  @data: [{pool:'', worker: '', pwd: ''}]
 ```
 
 **build**
